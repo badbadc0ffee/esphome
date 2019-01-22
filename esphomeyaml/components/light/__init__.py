@@ -57,6 +57,7 @@ AddressableRandomTwinkleEffect = light_ns.class_('AddressableRandomTwinkleEffect
                                                  AddressableLightEffect)
 AddressableFireworksEffect = light_ns.class_('AddressableFireworksEffect', AddressableLightEffect)
 AddressableFlickerEffect = light_ns.class_('AddressableFlickerEffect', AddressableLightEffect)
+WordClockEffect = light_ns.class_('WordClockEffect', AddressableLightEffect)
 
 CONF_STROBE = 'strobe'
 CONF_FLICKER = 'flicker'
@@ -68,6 +69,7 @@ CONF_ADDRESSABLE_TWINKLE = 'addressable_twinkle'
 CONF_ADDRESSABLE_RANDOM_TWINKLE = 'addressable_random_twinkle'
 CONF_ADDRESSABLE_FIREWORKS = 'addressable_fireworks'
 CONF_ADDRESSABLE_FLICKER = 'addressable_flicker'
+CONF_WORDCLOCK = 'wordclock'
 
 CONF_ADD_LED_INTERVAL = 'add_led_interval'
 CONF_REVERSE = 'reverse'
@@ -85,7 +87,7 @@ RGB_EFFECTS = MONOCHROMATIC_EFFECTS + [CONF_RANDOM]
 ADDRESSABLE_EFFECTS = RGB_EFFECTS + [CONF_ADDRESSABLE_LAMBDA, CONF_ADDRESSABLE_RAINBOW,
                                      CONF_ADDRESSABLE_COLOR_WIPE, CONF_ADDRESSABLE_SCAN,
                                      CONF_ADDRESSABLE_TWINKLE, CONF_ADDRESSABLE_RANDOM_TWINKLE,
-                                     CONF_ADDRESSABLE_FIREWORKS, CONF_ADDRESSABLE_FLICKER]
+                                     CONF_ADDRESSABLE_FIREWORKS, CONF_ADDRESSABLE_FLICKER, CONF_WORDCLOCK]
 
 EFFECTS_SCHEMA = vol.Schema({
     vol.Optional(CONF_LAMBDA): vol.Schema({
@@ -174,6 +176,10 @@ EFFECTS_SCHEMA = vol.Schema({
         vol.Optional(CONF_NAME, default="Addressable Flicker"): cv.string,
         vol.Optional(CONF_UPDATE_INTERVAL): cv.positive_time_period_milliseconds,
         vol.Optional(CONF_INTENSITY): cv.percentage,
+    }),
+    vol.Optional(CONF_WORDCLOCK): vol.Schema({
+        cv.GenerateID(CONF_EFFECT_ID): cv.declare_variable_id(WordClockEffect),
+        vol.Optional(CONF_NAME, default="WordClock"): cv.string,
     }),
 })
 
@@ -365,6 +371,10 @@ def build_effect(full_config):
             add(effect.set_update_interval(config[CONF_UPDATE_INTERVAL]))
         if CONF_INTENSITY in config:
             add(effect.set_intensity(config[CONF_INTENSITY]))
+        yield effect
+    elif key == CONF_WORDCLOCK:
+        rhs = WordClockEffect.new(config[CONF_NAME])
+        effect = Pvariable(config[CONF_EFFECT_ID], rhs)
         yield effect
     else:
         raise NotImplementedError("Effect {} not implemented".format(next(config.keys())))
